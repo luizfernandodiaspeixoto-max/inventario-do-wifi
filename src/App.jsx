@@ -6,8 +6,10 @@ import RuckusDashboard from './components/RuckusDashboard'
 import MerakiDashboard from './components/MerakiDashboard'
 import UploadPanel from './components/UploadPanel'
 import LoginScreen from './components/LoginScreen'
+import AdminPanel from './components/AdminPanel'
 import { loadAllData, formatNumber } from './utils/dataLoader'
 import { isAuthenticated, logout, getProfile } from './utils/auth'
+import { api } from './utils/api'
 import './App.css'
 
 const TABS = [
@@ -103,6 +105,8 @@ function App() {
   const [tab, setTab] = useState('overview')
   const [custom, setCustom] = useState({})
   const [showUpload, setShowUpload] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [adminRefreshKey, setAdminRefreshKey] = useState(0)
   const profile = getProfile()
 
   function handleLogout() {
@@ -121,14 +125,18 @@ function App() {
         if (!active) return
         setBase({ status: 'error', intelbras: [], aruba: [], ruckus: [], meraki: [], error: String(err), availability: {} })
       })
-    return () => {
-      active = false
-    }
+    api('api/check-admin')
+      .then((d) => { if (active) setIsAdmin(Boolean(d.isAdmin)) })
+      .catch(() => { if (active) setIsAdmin(false) })
+    return () => { active = false }
   }, [])
 
   if (!authed) {
     return <LoginScreen />
   }
+
+  const tabs = [...TABS]
+  if (isAdmin) tabs.push({ id: 'admin', label: 'Administração' })
 
   const state = {
     ...base,
@@ -197,7 +205,7 @@ function App() {
         )}
 
         <nav className="tabs">
-          {TABS.map((t) => (
+          {tabs.map((t) => (
             <button
               key={t.id}
               className={`tab ${tab === t.id ? 'active' : ''}`}
@@ -225,7 +233,11 @@ function App() {
           </div>
         )}
 
-        {state.status === 'ready' && (
+        {tab === 'admin' && isAdmin && (
+          <AdminPanel refreshKey={adminRefreshKey} onRefresh={() => setAdminRefreshKey((k) => k + 1)} />
+        )}
+
+        {state.status === 'ready' && tab !== 'admin' && (
           <>
             {tab === 'overview' && (
               <Overview
