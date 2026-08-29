@@ -7,7 +7,7 @@ import MerakiDashboard from './components/MerakiDashboard'
 import UploadPanel from './components/UploadPanel'
 import LoginScreen from './components/LoginScreen'
 import { loadAllData, formatNumber } from './utils/dataLoader'
-import { isAuthenticated, logout } from './utils/auth'
+import { isAuthenticated, logout, getProfile } from './utils/auth'
 import './App.css'
 
 const TABS = [
@@ -103,6 +103,7 @@ function App() {
   const [tab, setTab] = useState('overview')
   const [custom, setCustom] = useState({})
   const [showUpload, setShowUpload] = useState(false)
+  const profile = getProfile()
 
   function handleLogout() {
     logout()
@@ -172,6 +173,11 @@ function App() {
             <UploadCloud size={15} />
             Atualizar dados
           </button>
+          {profile && profile.name && (
+            <span className="user-chip" title={`${profile.name} <${profile.email || ''}>`}>
+              {profile.name}
+            </span>
+          )}
           <button className="logout-btn" onClick={handleLogout} title="Sair">
             <LogOut size={15} />
             Sair

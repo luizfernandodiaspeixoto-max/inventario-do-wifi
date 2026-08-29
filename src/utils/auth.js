@@ -1,31 +1,46 @@
-const ADMIN_USER = 'admin'
-const ADMIN_PASS = '21wqsaxz'
-
-const SESSION_KEY = 'wifi_inventory_auth'
+const SESSION_KEY = 'wifi_inventory_session'
+const PROFILE_KEY = 'wifi_inventory_profile'
 
 export function isAuthenticated() {
   try {
-    return sessionStorage.getItem(SESSION_KEY) === '1'
+    return Boolean(sessionStorage.getItem(SESSION_KEY))
   } catch {
     return false
   }
 }
 
-export function authenticate(user, pass) {
-  if (user === ADMIN_USER && pass === ADMIN_PASS) {
-    try {
-      sessionStorage.setItem(SESSION_KEY, '1')
-    } catch {
-      /* persistência é opcional */
-    }
-    return true
+export async function login(email, password) {
+  const res = await fetch('api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok || !data.ok) {
+    throw new Error(data.error || 'Não foi possível entrar.')
   }
-  return false
+  try {
+    sessionStorage.setItem(SESSION_KEY, data.token)
+    sessionStorage.setItem(PROFILE_KEY, JSON.stringify({ name: data.name, email: data.email }))
+  } catch {
+    /* persistência é opcional */
+  }
+  return data
+}
+
+export function getProfile() {
+  try {
+    const raw = sessionStorage.getItem(PROFILE_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
 }
 
 export function logout() {
   try {
     sessionStorage.removeItem(SESSION_KEY)
+    sessionStorage.removeItem(PROFILE_KEY)
   } catch {
     /* ignorar */
   }

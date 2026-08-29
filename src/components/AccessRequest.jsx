@@ -1,21 +1,32 @@
 import { useState } from 'react'
 import { X, Send, UserRound, AtSign, Info } from 'lucide-react'
 
-const ADMIN_EMAIL = 'luiz.peixoto@oi.net.br'
-
 export default function AccessRequest({ onClose }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
+  const [status, setStatus] = useState(null)
+  const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    const subject = encodeURIComponent(`[Inventário Wi-Fi] Solicitação de acesso de ${name}`)
-    const body = encodeURIComponent(
-      `Olá Luiz,\n\nSolicito acesso ao dashboard de Inventário de Redes Wi-Fi.\n\nNome: ${name}\nEmail: ${email}\n\nFavor enviar a senha de acesso.\n\nObrigado.`
-    )
-    window.location.href = `mailto:${ADMIN_EMAIL}?subject=${subject}&body=${body}`
-    setSent(true)
+    setLoading(true)
+    setStatus(null)
+    try {
+      const res = await fetch('api/request-access', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || 'Não foi possível enviar a solicitação.')
+      }
+      setStatus({ type: 'ok', message: data.message })
+    } catch (err) {
+      setStatus({ type: 'error', message: err.message })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -31,15 +42,12 @@ export default function AccessRequest({ onClose }) {
           </button>
         </div>
 
-        {sent ? (
+        {status && status.type === 'ok' ? (
           <div className="access-sent">
             <Info size={20} />
-            <p>
-              Seu aplicativo de email foi aberto para enviar a solicitação ao administrador.
-              Após o envio, <strong>{ADMIN_EMAIL}</strong> responderá com a senha de acesso.
-            </p>
+            <p>{status.message}</p>
             <p className="access-sent-tip">
-              Se nada abriu, envie manualmente para {ADMIN_EMAIL} informando nome e email.
+              Aguarde o administrador aprovar. Você receberá a senha por email.
             </p>
             <button className="login-btn" type="button" onClick={onClose}>
               Voltar para o login
@@ -78,14 +86,17 @@ export default function AccessRequest({ onClose }) {
               </div>
             </div>
 
+            {status && status.type === 'error' && (
+              <div className="login-error">{status.message}</div>
+            )}
+
             <div className="access-hint">
-              Ao enviar, seu app de email abrirá com a solicitação pronta para{' '}
-              <strong>{ADMIN_EMAIL}</strong>. O administrador responderá com a senha.
+              Ao enviar, o administrador receberá o pedido e enviará a senha de acesso por email.
             </div>
 
-            <button type="submit" className="login-btn">
+            <button type="submit" className="login-btn" disabled={loading}>
               <Send size={16} />
-              Enviar solicitação
+              {loading ? 'Enviando...' : 'Enviar solicitação'}
             </button>
           </form>
         )}

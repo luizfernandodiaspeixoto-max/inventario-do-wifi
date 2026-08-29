@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Lock, ShieldCheck, User, KeyRound, HelpCircle } from 'lucide-react'
-import { authenticate } from '../utils/auth'
+import { login } from '../utils/auth'
 import AccessRequest from './AccessRequest'
 
 export default function LoginScreen() {
@@ -10,19 +10,18 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false)
   const [showRequest, setShowRequest] = useState(false)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     setLoading(true)
     setError('')
-    setTimeout(() => {
-      if (authenticate(user, pass)) {
-        window.location.reload()
-      } else {
-        setError('Login ou senha incorretos.')
-        setPass('')
-        setLoading(false)
-      }
-    }, 350)
+    try {
+      await login(user, pass)
+      window.location.reload()
+    } catch (err) {
+      setError(err.message || 'Login ou senha incorretos.')
+      setPass('')
+      setLoading(false)
+    }
   }
 
   return (
@@ -36,16 +35,17 @@ export default function LoginScreen() {
 
         <form onSubmit={handleSubmit}>
           <div className="login-field">
-            <label>Login</label>
+            <label>Email</label>
             <div className="login-input-wrap">
               <User size={16} className="login-input-icon" />
               <input
-                type="text"
+                type="email"
                 className="login-input"
                 value={user}
                 onChange={(e) => { setUser(e.target.value); setError('') }}
-                placeholder="Usuário"
+                placeholder="seuemail@exemplo.com"
                 autoFocus
+                required
               />
             </div>
           </div>
@@ -60,6 +60,7 @@ export default function LoginScreen() {
                 value={pass}
                 onChange={(e) => { setPass(e.target.value); setError('') }}
                 placeholder="Senha"
+                required
               />
             </div>
           </div>
