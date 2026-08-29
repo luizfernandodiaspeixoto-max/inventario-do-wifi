@@ -1,0 +1,18 @@
+Network,Organization,Usage,Clients,Tags,Network Type,MX,MS,MR,MV,MG,MT
+NAVIRAI-MS,SSP Departamento Estadual de Transito de MS,None,0,,Wireless,0,0,1,0,0,0
+CORUMBÁ-MS,SSP Departamento Estadual de Transito de MS,131.62 GB,439,,Wireless,0,0,2,0,0,0
+DETRAN SEDE - CAMPO GRANDE,SSP Departamento Estadual de Transito de MS,None,0,,Wireless,0,0,3,0,0,0
+AQUIDAUANA-MS,SSP Departamento Estadual de Transito de MS,19.27 GB,97,,Wireless,0,0,1,0,0,0
+DOURADOS - MS,SSP Departamento Estadual de Transito de MS,None,0,,Wireless,0,0,3,0,0,0
+SEDE SHOPPING - TRES LAGOAS -MS,SSP Departamento Estadual de Transito de MS,None,0,,Wireless,0,0,1,0,0,0
+AGENCIA SHOPPING CAMPO GRANDE - MS,SSP Departamento Estadual de Transito de MS,None,0,,Wireless,0,0,1,0,0,0
+PONTA PORÂ - MS,SSP Departamento Estadual de Transito de MS,19.01 GB,130,,Wireless,0,0,1,0,0,0
+BOSQUE DOS IPES,SSP Departamento Estadual de Transito de MS,None,0,,Wireless,0,0,1,0,0,0
+NOVA ANDRADINA,SSP Departamento Estadual de Transito de MS,7.34 GB,103,,Wireless,0,0,1,0,0,0
+PARANAIBA,SSP Departamento Estadual de Transito de MS,23.19 GB,50,,Wireless,0,0,2,0,0,0
+"SGUARIO E SILVA 1 ","L. M. SGUARIO E SILVA & CIA ",None,0,,Combined,1,0,0,0,0,0
+"DOMESTILAR -1  ","DOMESTILAR ",None,0,,Combined,0,0,26,0,0,0
+"AGROPECUARIA JAYORO LTDA ",AGROPECUARIA JAYORO LTDA,None,0,,Combined,0,0,0,0,0,0
+"TAHTO ","TAHTO -BRASIL TELECOM CALL CENTER ",None,0,,Combined,0,0,28,0,0,0
+SICOOB,sicoob,None,0,,Wireless,0,0,0,0,0,0
+SICOOB,Teste SICOOB,None,0,,Wireless,0,0,0,0,0,0
