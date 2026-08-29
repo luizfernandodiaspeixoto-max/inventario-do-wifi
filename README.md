@@ -1,97 +1,88 @@
 # Inventário de Redes Wi-Fi
 
-Dashboard consolidado de monitoramento de Access Points das redes **Intelbras, Aruba, Ruckus e Meraki**, com separação clara por fabricante.
+Dashboard consolidado de monitoramento de Access Points das redes **Intelbras, Aruba, Ruckus e Meraki**, com gráficos interativos, sistema de acesso protegido por login e painel de administração.
+
+**Site em produção:** https://inventariodowifi.vercel.app
 
 ## 🚀 Rodar localmente
 
 ```bash
+cd G:\meu-projeto
+git pull
 npm install
-npm run dev
+vercel dev --port 3333
 ```
 
-- **Build de produção:** `npm run build`
-- **Lint:** `npm run lint`
+Acesse: **http://localhost:3333**
 
-## 📊 Como atualizar os dados (CSV/XLSX)
+Ou dê duplo clique no atalho **"Inventario Wi-Fi"** na Área de Trabalho.
 
-Os dados ficam na pasta **`public/data/`**. Para atualizar, basta **substituir os arquivos** e enviar as alterações (push) — o site é publicado automaticamente pelo GitHub Actions.
+## 🔐 Sistema de acesso
 
-| Fabricante | Arquivo (em `public/data/`) | Formato |
-|------------|-----------------------------|---------|
-| Intelbras  | `Device_Report.xlsx`        | Excel   |
-| Aruba      | `Device_Inventory_Report.csv` | CSV   |
-| Ruckus     | `Inventario_Ruckus.csv`     | CSV     |
-| Meraki     | `Inventario_Meraki.csv`     | CSV     |
+O site é protegido por login. O fluxo é:
 
-### Passo a passo para atualizar
+1. O visitante clica em **"Solicitar acesso"** e informa nome + email
+2. O pedido aparece no painel de administração
+3. O admin aprova — o sistema gera uma senha e envia por email (ou mostra no painel)
+4. O visitante loga com email + senha
 
-1. Substitua os arquivos na pasta `public/data/` **mantendo o mesmo nome**.
-2. Faça o commit e o push:
+### Credenciais do admin
+
+| Campo | Valor |
+|-------|-------|
+| Email | `luiz.peixoto@oi.net.br` |
+| Senha | `21wqsaxz` |
+
+## 📊 Atualizar dados (CSV/XLSX)
+
+Os dados ficam na pasta `public/data/`. Mantenha os **mesmos nomes** de arquivo.
+
+| Fabricante | Arquivo | Formato |
+|------------|---------|---------|
+| Intelbras | `Device_Report.xlsx` | Excel |
+| Aruba | `Device_Inventory_Report.csv` | CSV |
+| Ruckus | `Inventario_Ruckus.csv` | CSV |
+| Meraki | `Inventario_Meraki.csv` | CSV |
+
+**Publicar dados atualizados:**
 
 ```bash
 git add public/data/
 git commit -m "Atualiza inventário"
 git push
+vercel --prod --yes
+vercel alias set inventariodowifi-XXXX.vercel.app inventariodowifi.vercel.app
 ```
 
-3. O GitHub Actions reconstrói e publica o site automaticamente (leva ~1 min).
-4. Acesse o site em **<https://luizfernandodiaspeixoto-max.github.io/inventario-do-wifi/>**.
+## 🔧 Variáveis de ambiente
 
-> ⚠️ Mantenha os **mesmos nomes de arquivo**, pois o código os procura pelo nome fixo.
+| Variável | Descrição | Obrigatória |
+|----------|-----------|-------------|
+| `UPSTASH_REDIS_REST_URL` | URL do banco Upstash Redis | ✅ |
+| `UPSTASH_REDIS_REST_TOKEN` | Token do banco Upstash Redis | ✅ |
+| `JWT_SECRET` | Segredo para tokens JWT | ✅ |
+| `ADMIN_EMAIL` | Email do administrador | ✅ |
+| `ADMIN_SECRET` | Segredo para API /revoke | ➖ |
+| `RESEND_API_KEY` | Chave do Resend (email) | ✅ |
+| `MAIL_FROM` | Endereço de origem dos emails | ✅ |
+| `SITE_URL` | URL pública do site | ✅ |
 
-## 🔐 Sistema de acesso (login automático)
+> O Resend está em modo teste (só envia para `luizfernandodiaspeixoto@gmail.com`). Para enviar para qualquer pessoa, verifique um domínio em https://resend.com/domains.
 
-O site é protegido por login. O acesso é **aprovado via link por email**:
+## 🧱 Stack
 
-1. O visitante clica em **"Solicitar acesso"** e informa nome + email.
-2. O sistema envia um email para você (`luiz.peixoto@oi.net.br`) com um botão **"Aprovar acesso"**.
-3. Ao clicar em aprovar, o sistema **gera uma senha automaticamente** e a envia por email ao visitante.
-4. O visitante entra no site com o email e a senha recebida.
+- React 19 + Vite 8
+- Recharts, PapaParse, SheetJS, Lucide
+- Vercel Serverless Functions (APIs)
+- Upstash Redis (banco de usuários)
+- Resend (email automático)
+- JWT via jose (autenticação)
 
-> Você também pode **remover o acesso** de alguém via API (ver abaixo).
+## 📄 Documentação
 
-### Configuração no Vercel
-
-Sem servidor próprio (site estático), o backend usa **Vercel Serverless Functions**. As variáveis abaixo devem ser configuradas em **Vercel → Project Settings → Environment Variables** (ou no `.env.local` para testes locais):
-
-| Variável | Obrigatória | Descrição |
-|----------|-------------|-----------|
-| `RESEND_API_KEY` | ✅ | Chave de API do Resend (envios de email). Crie em https://resend.com |
-| `MAIL_FROM` | ✅ | Endereço de origem (domínio verificado no Resend, ou `onboarding@resend.dev` para testes) |
-| `ADMIN_EMAIL` | ✅ | Seu email que recebe e aprova os pedidos (`luiz.peixoto@oi.net.br`) |
-| `JWT_SECRET` | ✅ | Segredo aleatório/longo para assinar os tokens de sessão |
-| `SITE_URL` | ✅ | URL pública do site (ex.: `https://inventariodowifi.vercel.app`) |
-| `UPSTASH_REDIS_REST_URL` | ✅ | URL do banco Redis (Upstash) — armazena usuários |
-| `UPSTASH_REDIS_REST_TOKEN` | ✅ | Token do banco Redis (Upstash) |
-| `ADMIN_SECRET` | ➖ | Segredo para remover acessos via API `/api/revoke` |
-
-**Passo a passo:**
-- Crie um banco Redis grátis em https://console.upstash.com (tipo Redis) e copie a URL e o token REST.
-- Crie uma API Key em https://resend.com e, idealmente, **verifique um domínio** para poder enviar email real (o domínio padrão `onboarding@resend.dev` serve só para testes).
-- Configure todas as variáveis acima no Vercel e faça redeploy.
-
-### Remover acesso de uma pessoa (opcional)
-
-```bash
-curl -X POST https://SEU-SITE/api/revoke \
-  -H "Content-Type: application/json" \
-  -H "x-admin-secret: SEU_ADMIN_SECRET" \
-  -d '{"email":"pessoa@exemplo.com"}'
-```
-
-### Limitação
-
-O armazenamento em memória (fallback sem Redis) **não persiste entre recarregamentos** — em produção é obrigatório configurar o Upstash Redis.
-
-## 🧱 Tecnologias
-
-- React 19 + Vite
-- Recharts (gráficos)
-- PapaParse (CSV)
-- SheetJS xlsx (Excel)
-- Lucide (ícones)
-- Vercel Serverless Functions (API de autenticação)
-- Resend (envio de email) + Upstash Redis (banco) + jose (JWT)
+- `documentacao do projeto/Documentacao_Projeto_Inventario_WiFi.md` — documentação completa
+- `CONTEXTO.md` — resumo rápido para retomar o projeto
 
 ---
-Criado por **Luiz Fernando** · <luiz.peixoto@oi.net.br>
+
+Criado por **Luiz Fernando Peixoto** · luiz.peixoto@oi.net.br
