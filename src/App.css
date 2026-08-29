@@ -1448,6 +1448,148 @@ body {
   margin-top: 12px;
 }
 
+.admin-panel-create {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.admin-field {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.admin-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+
+.admin-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+
+.admin-checkbox input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+/* ---------- Sessions ---------- */
+.admin-sessions-toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-sessions-table-wrapper {
+  overflow-x: auto;
+}
+
+.admin-sessions-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 700px;
+}
+
+.admin-sessions-table th,
+.admin-sessions-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-sessions-table th {
+  background: var(--card-2);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.admin-sessions-table tr:hover td {
+  background: var(--bg-soft);
+}
+
+.admin-sessions-table tr.active td {
+  background: rgba(52, 211, 153, 0.08);
+}
+
+.admin-sessions-table code {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.admin-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.admin-status-badge.active {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--green);
+}
+
+.admin-status-badge.inactive {
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--text-muted);
+}
+
+.admin-action.blue {
+  border-color: rgba(56, 189, 248, 0.35);
+  color: var(--accent);
+}
+
+.admin-action.blue:hover:not(:disabled) {
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--accent);
+}
+
 .admin-header {
   display: flex;
   flex-direction: column;
@@ -1720,24 +1862,33 @@ body {
 /* ========== RESPONSIVE ========== */
 @media (max-width: 768px) {
   .topbar {
-    padding: 6px 12px;
+    padding: 8px 12px;
     gap: 8px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
 
   .brand {
     gap: 8px;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
   }
 
   .brand-img {
-    height: 30px;
+    height: 36px;
   }
 
   .brand h1 {
-    font-size: 14px;
+    font-size: 18px;
+    margin: 0;
   }
 
   .brand p {
-    display: none;
+    display: block;
+    font-size: 12px;
+    margin: 2px 0 0;
   }
 
   .link-badge {
@@ -1746,6 +1897,33 @@ body {
 
   .header-actions {
     gap: 6px;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .header-actions .link-badge.update,
+  .header-actions .custom-badge,
+  .header-actions .user-chip {
+    display: none;
+  }
+
+  .header-actions .logout-btn span,
+  .header-actions .upload-btn.header span {
+    display: none;
+  }
+
+  .header-actions .logout-btn,
+  .header-actions .upload-btn.header {
+    padding: 7px;
+  }
+
+  .header-actions .upload-btn.header.admin span {
+    display: none;
+  }
+
+  .header-actions .upload-btn.header.admin {
+    padding: 7px;
   }
 
   .container {
@@ -1753,26 +1931,25 @@ body {
   }
 
   .page-intro {
-    padding: 6px 0 2px;
-  }
-
-  .page-intro h2 {
-    font-size: 16px;
-  }
-
-  .page-intro p {
-    font-size: 11px;
+    display: none;
   }
 
   .tabs {
-    margin: 4px auto 6px;
-    padding: 3px;
-    gap: 3px;
+    margin: 8px auto 6px;
+    padding: 4px;
+    gap: 4px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .tab {
-    padding: 6px 12px;
-    font-size: 12px;
+    padding: 8px 14px;
+    font-size: 13px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    justify-content: center;
   }
 
   .overview-grid {

@@ -1,5 +1,6 @@
 const SESSION_KEY = 'wifi_inventory_session'
 const PROFILE_KEY = 'wifi_inventory_profile'
+const SESSION_ID_KEY = 'wifi_inventory_session_id'
 
 export function isAuthenticated() {
   try {
@@ -22,6 +23,9 @@ export async function login(email, password) {
   try {
     sessionStorage.setItem(SESSION_KEY, data.token)
     sessionStorage.setItem(PROFILE_KEY, JSON.stringify({ name: data.name, email: data.email }))
+    if (data.sessionId) {
+      sessionStorage.setItem(SESSION_ID_KEY, data.sessionId)
+    }
   } catch {
     /* persistência é opcional */
   }
@@ -37,10 +41,32 @@ export function getProfile() {
   }
 }
 
-export function logout() {
+export function getSessionId() {
+  try {
+    return sessionStorage.getItem(SESSION_ID_KEY)
+  } catch {
+    return null
+  }
+}
+
+export async function logout() {
+  const sessionId = getSessionId()
+  if (sessionId) {
+    try {
+      await fetch('api/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+        keepalive: true,
+      })
+    } catch {
+      /* ignora erro de logout no servidor */
+    }
+  }
   try {
     sessionStorage.removeItem(SESSION_KEY)
     sessionStorage.removeItem(PROFILE_KEY)
+    sessionStorage.removeItem(SESSION_ID_KEY)
   } catch {
     /* ignorar */
   }

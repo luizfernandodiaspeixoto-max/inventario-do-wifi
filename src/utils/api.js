@@ -6,10 +6,23 @@ function token() {
   }
 }
 
-export async function api(path, { method = 'GET', body } = {}) {
+function apiPath(action, params = {}) {
+  const base = '/api'
+  const sp = new URLSearchParams(params)
+  return `${base}/${action}?${sp.toString()}`
+}
+
+export async function api(action, { method = 'GET', body, params } = {}) {
   const headers = { 'Content-Type': 'application/json' }
   const t = token()
   if (t) headers.Authorization = `Bearer ${t}`
+
+  let path
+  if (params) {
+    path = apiPath(action, params)
+  } else {
+    path = action.startsWith('/') ? action : `/api/${action}`
+  }
 
   const res = await fetch(path, {
     method,
