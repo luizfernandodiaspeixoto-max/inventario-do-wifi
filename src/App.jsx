@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Layers, Mail, CalendarDays, UploadCloud, LogOut } from 'lucide-react'
+import { Layers, Mail, CalendarDays, UploadCloud, LogOut, ShieldCheck } from 'lucide-react'
 import IntelbrasDashboard from './components/IntelbrasDashboard'
 import ArubaDashboard from './components/ArubaDashboard'
 import RuckusDashboard from './components/RuckusDashboard'
@@ -128,6 +128,7 @@ function App() {
     api('api/check-admin')
       .then((d) => { if (active) setIsAdmin(Boolean(d.isAdmin)) })
       .catch(() => { if (active) setIsAdmin(false) })
+    api('api/visits', { method: 'POST' }).catch(() => {})
     return () => { active = false }
   }, [])
 
@@ -136,7 +137,6 @@ function App() {
   }
 
   const tabs = [...TABS]
-  if (isAdmin) tabs.push({ id: 'admin', label: 'Administração' })
 
   const state = {
     ...base,
@@ -159,7 +159,7 @@ function App() {
       <header className="topbar">
         <div className="brand">
           <div className="brand-logo">
-            <img src={`${import.meta.env.BASE_URL}logo-oi.svg`} alt="Logo Oi" className="brand-img" />
+            <img src={`${import.meta.env.BASE_URL}logo-wifi.svg`} alt="Logo Wi-Fi" className="brand-img" />
           </div>
           <div>
             <h1>Inventário de Redes Wi-Fi</h1>
@@ -177,6 +177,16 @@ function App() {
             <span>Última atualização</span>
             <code>{lastUpdateGlobal.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}</code>
           </div>
+          {isAdmin && (
+            <button
+              className={`upload-btn header admin ${tab === 'admin' ? 'active' : ''}`}
+              onClick={() => setTab(tab === 'admin' ? 'overview' : 'admin')}
+              title="Administração"
+            >
+              <ShieldCheck size={15} />
+              Administração
+            </button>
+          )}
           <button className="upload-btn header" onClick={() => setShowUpload(true)}>
             <UploadCloud size={15} />
             Atualizar dados

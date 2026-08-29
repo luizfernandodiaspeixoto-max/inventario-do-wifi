@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   ShieldCheck, Clock, Users, CheckCircle, XCircle,
-  Mail, KeyRound, Trash2, Eye, EyeOff, Loader,
+  Mail, KeyRound, Trash2, Eye, EyeOff, Loader, BarChart3, MousePointerClick,
 } from 'lucide-react'
 import { api } from '../utils/api'
+import { formatNumber } from '../utils/dataLoader'
 
 function fmtDate(ts) {
   if (!ts) return '—'
@@ -227,6 +228,40 @@ function UsersList({ onRefresh }) {
   )
 }
 
+function VisitsCard() {
+  const [stats, setStats] = useState(null)
+
+  const load = useCallback(async () => {
+    try {
+      const data = await api('api/visits')
+      setStats(data.stats)
+    } catch {
+      /* ignora */
+    }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  return (
+    <div className="admin-visits">
+      <div className="admin-visits-card">
+        <MousePointerClick size={22} />
+        <div>
+          <span className="admin-visits-value">{stats ? formatNumber(stats.total) : '—'}</span>
+          <span className="admin-visits-label">visitas totais</span>
+        </div>
+      </div>
+      <div className="admin-visits-card">
+        <BarChart3 size={22} />
+        <div>
+          <span className="admin-visits-value">{stats ? formatNumber(stats.daily) : '—'}</span>
+          <span className="admin-visits-label">visitas hoje</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function AdminPanel({ refreshKey, onRefresh }) {
   const [tab, setTab] = useState('pending')
 
@@ -243,6 +278,7 @@ export default function AdminPanel({ refreshKey, onRefresh }) {
           </button>
         </div>
       </div>
+      <VisitsCard key={'visits-' + refreshKey} />
       <div className="admin-body">
         {tab === 'pending' && <PendingList onRefresh={onRefresh} key={'pending-' + refreshKey} />}
         {tab === 'users' && <UsersList onRefresh={onRefresh} key={'users-' + refreshKey} />}
