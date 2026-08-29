@@ -35,7 +35,7 @@ git push
 ```
 
 3. O GitHub Actions reconstrói e publica o site automaticamente (leva ~1 min).
-4. Acesse o site em **<https://luizfernandodiaspeixoto-max.github.io/inventario-wifi/>**.
+4. Acesse o site em **<https://luizfernandodiaspeixoto-max.github.io/inventario-do-wifi/>**.
 
 > ⚠️ Mantenha os **mesmos nomes de arquivo**, pois o código os procura pelo nome fixo.
 

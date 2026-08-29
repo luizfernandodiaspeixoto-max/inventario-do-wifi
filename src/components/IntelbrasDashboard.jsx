@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import {
   ResponsiveContainer,
   PieChart,
@@ -86,9 +86,9 @@ function DonutStatus({ online, offline }) {
     { name: 'Offline', value: offline },
   ]
   return (
-    <ResponsiveContainer width="100%" height={250}>
+    <ResponsiveContainer width="100%" height="100%">
       <PieChart>
-        <Pie data={data} dataKey="value" nameKey="name" innerRadius={60} outerRadius={95} paddingAngle={2}>
+        <Pie data={data} dataKey="value" nameKey="name" innerRadius={40} outerRadius={70} paddingAngle={2}>
           {data.map((d, i) => (
             <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
           ))}
@@ -102,11 +102,11 @@ function DonutStatus({ online, offline }) {
 
 function BarSites({ data }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer width="100%" height="100%">
       <BarChart data={data} layout="vertical" margin={{ left: 8, right: 24 }}>
         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#2a3a55" />
         <XAxis type="number" tickFormatter={formatNumber} stroke="#64748b" />
-        <YAxis type="category" dataKey="name" width={95} tick={{ fontSize: 12 }} stroke="#64748b" />
+        <YAxis type="category" dataKey="name" width={80} tick={{ fontSize: 10 }} stroke="#64748b" />
         <Tooltip formatter={(v) => formatNumber(v)} />
         <Bar dataKey="value" name="APs" fill="#38bdf8" radius={[0, 6, 6, 0]} />
       </BarChart>
@@ -116,8 +116,8 @@ function BarSites({ data }) {
 
 function BarModels({ data }) {
   return (
-    <ResponsiveContainer width="100%" height={250}>
-      <BarChart data={data} margin={{ top: 12, right: 20, left: 4, bottom: 4 }}>
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart data={data} margin={{ top: 8, right: 16, left: 4, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#2a3a55" vertical={false} />
         <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="#64748b" />
         <YAxis tickFormatter={formatNumber} stroke="#64748b" />
@@ -130,8 +130,8 @@ function BarModels({ data }) {
 
 function OnlineBar({ data }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <BarChart data={data} margin={{ top: 12, right: 20, left: 4, bottom: 4 }}>
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart data={data} margin={{ top: 8, right: 16, left: 4, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#2a3a55" vertical={false} />
         <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#64748b" />
         <YAxis tickFormatter={formatNumber} stroke="#64748b" />

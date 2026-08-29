@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { UploadCloud, RefreshCw, X, FileSpreadsheet, Lock } from 'lucide-react'
+import { UploadCloud, RefreshCw, X, FileSpreadsheet } from 'lucide-react'
 import { readRowsFromFile, mapRowsForVendor } from '../utils/dataLoader'
 
 const VENDORS = [
@@ -9,85 +9,12 @@ const VENDORS = [
   { id: 'meraki', label: 'Meraki', hint: 'Inventario_Meraki.csv' },
 ]
 
-const ADMIN_USER = 'admin'
-const ADMIN_PASS = '21wqsaxz'
-
-function LoginGate({ onLogin, onClose }) {
-  const [user, setUser] = useState('')
-  const [pass, setPass] = useState('')
-  const [error, setError] = useState('')
-
-  function handleSubmit(e) {
-    e.preventDefault()
-    if (user === ADMIN_USER && pass === ADMIN_PASS) {
-      onLogin()
-    } else {
-      setError('Login ou senha incorretos.')
-      setPass('')
-    }
-  }
-
-  return (
-    <div className="upload-overlay" onClick={onClose}>
-      <div className="upload-panel" onClick={(e) => e.stopPropagation()}>
-        <div className="upload-head">
-          <div>
-            <h3><Lock size={18} style={{ marginRight: 8, verticalAlign: 'middle' }} />Área restrita</h3>
-            <p>Faça login para acessar a atualização de dados.</p>
-          </div>
-          <button className="upload-close" onClick={onClose} aria-label="Fechar">
-            <X size={18} />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="upload-field">
-            <label>Login</label>
-            <input
-              type="text"
-              className="login-input"
-              value={user}
-              onChange={(e) => { setUser(e.target.value); setError('') }}
-              placeholder="Usuário"
-              autoFocus
-            />
-          </div>
-
-          <div className="upload-field">
-            <label>Senha</label>
-            <input
-              type="password"
-              className="login-input"
-              value={pass}
-              onChange={(e) => { setPass(e.target.value); setError('') }}
-              placeholder="Senha"
-            />
-          </div>
-
-          {error && <div className="upload-msg error">{error}</div>}
-
-          <div className="upload-actions">
-            <button type="submit" className="upload-btn primary">
-              Entrar
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  )
-}
-
 export default function UploadPanel({ onUpload, onClose }) {
-  const [authenticated, setAuthenticated] = useState(false)
   const [vendor, setVendor] = useState('intelbras')
   const [file, setFile] = useState(null)
   const [status, setStatus] = useState(null)
   const [loading, setLoading] = useState(false)
   const inputRef = useRef(null)
-
-  if (!authenticated) {
-    return <LoginGate onLogin={() => setAuthenticated(true)} onClose={onClose} />
-  }
 
   function handleFile(e) {
     const f = e.target.files && e.target.files[0]

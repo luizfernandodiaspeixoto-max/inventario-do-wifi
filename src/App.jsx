@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
-import { Layers, Mail, CalendarDays, UploadCloud } from 'lucide-react'
+import { Layers, Mail, CalendarDays, UploadCloud, LogOut } from 'lucide-react'
 import IntelbrasDashboard from './components/IntelbrasDashboard'
 import ArubaDashboard from './components/ArubaDashboard'
 import RuckusDashboard from './components/RuckusDashboard'
 import MerakiDashboard from './components/MerakiDashboard'
 import UploadPanel from './components/UploadPanel'
+import LoginScreen from './components/LoginScreen'
 import { loadAllData, formatNumber } from './utils/dataLoader'
+import { isAuthenticated, logout } from './utils/auth'
 import './App.css'
 
 const TABS = [
@@ -96,10 +98,16 @@ function Overview({ intelbras, aruba, ruckus, meraki, handleSelect }) {
 }
 
 function App() {
+  const [authed, setAuthed] = useState(() => isAuthenticated())
   const [base, setBase] = useState({ status: 'loading', intelbras: [], aruba: [], ruckus: [], meraki: [], error: null, availability: {} })
   const [tab, setTab] = useState('overview')
   const [custom, setCustom] = useState({})
   const [showUpload, setShowUpload] = useState(false)
+
+  function handleLogout() {
+    logout()
+    setAuthed(false)
+  }
 
   useEffect(() => {
     let active = true
@@ -116,6 +124,10 @@ function App() {
       active = false
     }
   }, [])
+
+  if (!authed) {
+    return <LoginScreen />
+  }
 
   const state = {
     ...base,
@@ -134,7 +146,7 @@ function App() {
   const lastUpdateGlobal = new Date(2026, 7, 29)
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${tab === 'overview' ? 'shell-overview' : 'shell-dash'}`}>
       <header className="topbar">
         <div className="brand">
           <div className="brand-logo">
@@ -160,17 +172,23 @@ function App() {
             <UploadCloud size={15} />
             Atualizar dados
           </button>
+          <button className="logout-btn" onClick={handleLogout} title="Sair">
+            <LogOut size={15} />
+            Sair
+          </button>
         </div>
       </header>
 
       <main className="container">
-        <section className="page-intro">
-          <h2>Monitoramento de Access Points</h2>
-          <p>
-            Inventário consolidado dos pontos de acesso das redes Intelbras, Aruba, Ruckus e Meraki, com
-            separação clara por fabricante.
-          </p>
-        </section>
+        {tab === 'overview' && (
+          <section className="page-intro">
+            <h2>Monitoramento de Access Points</h2>
+            <p>
+              Inventário consolidado dos pontos de acesso das redes Intelbras, Aruba, Ruckus e Meraki, com
+              separação clara por fabricante.
+            </p>
+          </section>
+        )}
 
         <nav className="tabs">
           {TABS.map((t) => (

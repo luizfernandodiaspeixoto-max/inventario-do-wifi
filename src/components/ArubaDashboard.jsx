@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import {
   ResponsiveContainer,
   PieChart,
@@ -88,11 +88,11 @@ function ChartCard({ title, subtitle, children }) {
 
 function BarModels({ data }) {
   return (
-    <ResponsiveContainer width="100%" height={300}>
+    <ResponsiveContainer width="100%" height="100%">
       <BarChart data={data} layout="vertical" margin={{ left: 8, right: 24 }}>
         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#2a3a55" />
         <XAxis type="number" tickFormatter={formatNumber} stroke="#64748b" />
-        <YAxis type="category" dataKey="name" width={95} tick={{ fontSize: 11 }} stroke="#64748b" />
+        <YAxis type="category" dataKey="name" width={80} tick={{ fontSize: 10 }} stroke="#64748b" />
         <Tooltip formatter={(v) => formatNumber(v)} />
         <Bar dataKey="value" name="APs licenciados" radius={[0, 6, 6, 0]}>
           {data.map((d, i) => (
@@ -106,11 +106,11 @@ function BarModels({ data }) {
 
 function BarAccounts({ data }) {
   return (
-    <ResponsiveContainer width="100%" height={300}>
+    <ResponsiveContainer width="100%" height="100%">
       <BarChart data={data} layout="vertical" margin={{ left: 8, right: 24 }}>
         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#2a3a55" />
         <XAxis type="number" tickFormatter={formatNumber} stroke="#64748b" />
-        <YAxis type="category" dataKey="name" width={160} tick={{ fontSize: 10 }} stroke="#64748b" />
+        <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 9 }} stroke="#64748b" />
         <Tooltip formatter={(v) => formatNumber(v)} />
         <Bar dataKey="value" name="APs" fill="#fbbf24" radius={[0, 6, 6, 0]} />
       </BarChart>
@@ -120,8 +120,8 @@ function BarAccounts({ data }) {
 
 function LineExpiration({ data }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <LineChart data={data} margin={{ top: 12, right: 20, left: 4, bottom: 4 }}>
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart data={data} margin={{ top: 8, right: 16, left: 4, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#2a3a55" />
         <XAxis dataKey="name" stroke="#64748b" />
         <YAxis tickFormatter={formatNumber} stroke="#64748b" />
@@ -134,9 +134,9 @@ function LineExpiration({ data }) {
 
 function DonutTier({ data }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer width="100%" height="100%">
       <PieChart>
-        <Pie data={data} dataKey="value" nameKey="name" innerRadius={60} outerRadius={95} paddingAngle={2}>
+        <Pie data={data} dataKey="value" nameKey="name" innerRadius={40} outerRadius={70} paddingAngle={2}>
           {data.map((d, i) => (
             <Cell key={i} fill={BAR_COLORS[i % BAR_COLORS.length]} />
           ))}

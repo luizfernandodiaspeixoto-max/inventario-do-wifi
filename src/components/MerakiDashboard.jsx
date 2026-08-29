@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+﻿import { useMemo } from 'react'
 import {
   ResponsiveContainer,
   BarChart,
@@ -12,7 +12,7 @@ import {
   Pie,
   Legend,
 } from 'recharts'
-import { Radio, MapPin, Wifi, CheckCircle } from 'lucide-react'
+import { Radio, MapPin, Wifi, CheckCircle, Users } from 'lucide-react'
 import { formatNumber, parseBytesGb } from '../utils/dataLoader'
 
 const BAR_COLORS = ['#38bdf8', '#6366f1', '#34d399', '#fbbf24', '#f472b6', '#8b5cf6', '#fb7185', '#22d3ee', '#a3e635']
@@ -57,15 +57,24 @@ function processRows(rows) {
 
   const orgs = [...new Set(withAp.map((r) => r.organization).filter(Boolean))].sort()
 
+  const totalClients = rows.reduce((s, r) => s + r.clients, 0)
+  const byClients = rows
+    .map((r) => ({ name: r.network || 'Não informado', clients: r.clients }))
+    .filter((r) => r.clients > 0)
+    .sort((a, b) => b.clients - a.clients)
+    .slice(0, 10)
+
   return {
     withAp,
     totalMr,
     networks: withAp.length,
     totalOrgs: orgs.length,
+    totalClients,
     byOrg: byOrgArr,
     byNetwork,
     byNetworkType: Object.entries(byNetworkType).map(([name, value]) => ({ name, value })),
     byUsage,
+    byClients,
     orgs,
   }
 }
@@ -99,11 +108,11 @@ function ChartCard({ title, subtitle, className, children }) {
 
 function BarOrganizations({ data }) {
   return (
-    <ResponsiveContainer width="100%" height={300}>
+    <ResponsiveContainer width="100%" height="100%">
       <BarChart data={data} layout="vertical" margin={{ left: 8, right: 24 }}>
         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#2a3a55" />
         <XAxis type="number" tickFormatter={formatNumber} stroke="#64748b" />
-        <YAxis type="category" dataKey="name" width={160} tick={{ fontSize: 10 }} stroke="#64748b" />
+        <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 9 }} stroke="#64748b" />
         <Tooltip formatter={(v) => formatNumber(v)} />
         <Bar dataKey="mr" name="APs (MR)" radius={[0, 6, 6, 0]}>
           {data.map((d, i) => (
@@ -117,9 +126,9 @@ function BarOrganizations({ data }) {
 
 function PieNetworkType({ data }) {
   return (
-    <ResponsiveContainer width="100%" height={260}>
+    <ResponsiveContainer width="100%" height="100%">
       <PieChart>
-        <Pie data={data} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={2}>
+        <Pie data={data} dataKey="value" nameKey="name" innerRadius={35} outerRadius={65} paddingAngle={2}>
           {data.map((d, i) => (
             <Cell key={i} fill={BAR_COLORS[i % BAR_COLORS.length]} />
           ))}
@@ -133,13 +142,27 @@ function PieNetworkType({ data }) {
 
 function BarUsage({ data }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer width="100%" height="100%">
       <BarChart data={data} layout="vertical" margin={{ left: 8, right: 24 }}>
         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#2a3a55" />
         <XAxis type="number" tickFormatter={(v) => v.toFixed(1) + ' GB'} stroke="#64748b" />
-        <YAxis type="category" dataKey="name" width={200} tick={{ fontSize: 10 }} stroke="#64748b" />
+        <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 9 }} stroke="#64748b" />
         <Tooltip formatter={(v) => v.toFixed(1) + ' GB'} />
         <Bar dataKey="usage" name="Tráfego (GB)" fill="#34d399" radius={[0, 6, 6, 0]} />
+      </BarChart>
+    </ResponsiveContainer>
+  )
+}
+
+function BarClients({ data }) {
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart data={data} layout="vertical" margin={{ left: 8, right: 24 }}>
+        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#2a3a55" />
+        <XAxis type="number" tickFormatter={formatNumber} stroke="#64748b" />
+        <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 9 }} stroke="#64748b" />
+        <Tooltip formatter={(v) => formatNumber(v)} />
+        <Bar dataKey="clients" name="Clientes" fill="#f472b6" radius={[0, 6, 6, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -170,12 +193,21 @@ export default function MerakiDashboard({ rows, lastUpdate }) {
         <KPI label="APs Ativos (MR)" value={data.totalMr} icon={Radio} color="#38bdf8" />
         <KPI label="Redes com APs" value={data.networks} icon={MapPin} color="#6366f1" />
         <KPI label="Organizações" value={data.totalOrgs} icon={Wifi} color="#34d399" />
+        <KPI label="Clientes conectados" value={data.totalClients} icon={Users} color="#f472b6" sub={`em ${data.byClients.length} redes com tráfego`} />
         <KPI label="Redes com tráfego" value={data.byUsage.length} icon={CheckCircle} color="#22d3ee" sub={`de ${data.networks} redes`} />
       </div>
 
       <div className="charts-grid">
         <ChartCard title="APs por rede" subtitle="Todas as redes com APs licenciados" className="wide">
           <BarOrganizations data={data.byNetwork} />
+        </ChartCard>
+
+        <ChartCard title="Clientes por rede" subtitle="Top redes com mais clientes conectados">
+          {data.byClients.length > 0 ? (
+            <BarClients data={data.byClients} />
+          ) : (
+            <p className="empty">Nenhum dado de clientes disponível.</p>
+          )}
         </ChartCard>
 
         <ChartCard title="APs por organização" subtitle="Quantidade de MR por organização">
