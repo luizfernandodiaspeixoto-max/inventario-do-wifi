@@ -60,7 +60,7 @@ Sem servidor próprio (site estático), o backend usa **Vercel Serverless Functi
 | `MAIL_FROM` | ✅ | Endereço de origem (domínio verificado no Resend, ou `onboarding@resend.dev` para testes) |
 | `ADMIN_EMAIL` | ✅ | Seu email que recebe e aprova os pedidos (`luiz.peixoto@oi.net.br`) |
 | `JWT_SECRET` | ✅ | Segredo aleatório/longo para assinar os tokens de sessão |
-| `SITE_URL` | ✅ | URL pública do site (ex.: `https://meu-projeto.vercel.app`) |
+| `SITE_URL` | ✅ | URL pública do site (ex.: `https://inventariodowifi.vercel.app`) |
 | `UPSTASH_REDIS_REST_URL` | ✅ | URL do banco Redis (Upstash) — armazena usuários |
 | `UPSTASH_REDIS_REST_TOKEN` | ✅ | Token do banco Redis (Upstash) |
 | `ADMIN_SECRET` | ➖ | Segredo para remover acessos via API `/api/revoke` |
