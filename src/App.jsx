@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Layers, Mail, CalendarDays } from 'lucide-react'
+import { Layers, Mail, CalendarDays, UploadCloud } from 'lucide-react'
 import IntelbrasDashboard from './components/IntelbrasDashboard'
 import ArubaDashboard from './components/ArubaDashboard'
 import RuckusDashboard from './components/RuckusDashboard'
 import MerakiDashboard from './components/MerakiDashboard'
+import UploadPanel from './components/UploadPanel'
 import { loadAllData, formatNumber } from './utils/dataLoader'
 import './App.css'
 
@@ -95,24 +96,38 @@ function Overview({ intelbras, aruba, ruckus, meraki, handleSelect }) {
 }
 
 function App() {
-  const [state, setState] = useState({ status: 'loading', intelbras: [], aruba: [], ruckus: [], meraki: [], error: null, availability: {} })
+  const [base, setBase] = useState({ status: 'loading', intelbras: [], aruba: [], ruckus: [], meraki: [], error: null, availability: {} })
   const [tab, setTab] = useState('overview')
+  const [custom, setCustom] = useState({})
+  const [showUpload, setShowUpload] = useState(false)
 
   useEffect(() => {
     let active = true
     loadAllData()
       .then(({ intelbras, aruba, ruckus, meraki, availability }) => {
         if (!active) return
-        setState({ status: 'ready', intelbras, aruba, ruckus, meraki, error: null, availability })
+        setBase({ status: 'ready', intelbras, aruba, ruckus, meraki, error: null, availability })
       })
       .catch((err) => {
         if (!active) return
-        setState({ status: 'error', intelbras: [], aruba: [], ruckus: [], meraki: [], error: String(err), availability: {} })
+        setBase({ status: 'error', intelbras: [], aruba: [], ruckus: [], meraki: [], error: String(err), availability: {} })
       })
     return () => {
       active = false
     }
   }, [])
+
+  const state = {
+    ...base,
+    intelbras: custom.intelbras || base.intelbras,
+    aruba: custom.aruba || base.aruba,
+    ruckus: custom.ruckus || base.ruckus,
+    meraki: custom.meraki || base.meraki,
+  }
+
+  function handleUpload(vendor, rows) {
+    setCustom((prev) => ({ ...prev, [vendor]: rows }))
+  }
 
   const lastUpdateIntel = new Date(2026, 7, 29, 7, 27, 24)
   const lastUpdateRuckus = new Date(2026, 7, 28, 21, 21)
@@ -131,11 +146,20 @@ function App() {
           </div>
         </div>
         <div className="header-actions">
+          {Object.keys(custom).length > 0 && (
+            <span className="custom-badge" title="Dados carregados nesta sessão">
+              {Object.keys(custom).length} atualizado(s)
+            </span>
+          )}
           <div className="link-badge update">
             <CalendarDays size={14} />
             <span>Última atualização</span>
             <code>{lastUpdateGlobal.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}</code>
           </div>
+          <button className="upload-btn header" onClick={() => setShowUpload(true)}>
+            <UploadCloud size={15} />
+            Atualizar dados
+          </button>
         </div>
       </header>
 
@@ -222,6 +246,13 @@ function App() {
           </a>
         </div>
       </footer>
+
+      {showUpload && (
+        <UploadPanel
+          onUpload={handleUpload}
+          onClose={() => setShowUpload(false)}
+        />
+      )}
     </div>
   )
 }
