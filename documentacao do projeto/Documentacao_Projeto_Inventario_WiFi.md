@@ -59,22 +59,15 @@ meu-projeto/
 │   ├── index.css
 │   └── main.jsx
 ├── api/                                (Vercel Serverless Functions)
-│   ├── approve.js
-│   ├── check-admin.js
-│   ├── deny.js
-│   ├── list-users.js
-│   ├── login.js
-│   ├── pending.js
-│   ├── request-access.js
-│   ├── revoke.js
-│   ├── seed.js
-│   ├── send-password.js
-│   └── visits.js                       (contagem de visitas)
+│   ├── auth.js                         (login, logout, check-admin, visitas)
+│   ├── admin.js                        (pedidos, usuários, senhas, notificação)
+│   ├── public.js                       (solicitação de acesso)
+│   └── sessions.js                     (visitas + sessões + exportação)
 ├── lib/                                (bibliotecas compartilhadas)
 │   ├── admin.js
-│   ├── auth.js
-│   ├── db.js
-│   ├── email.js
+│   ├── auth.js                         (JWT)
+│   ├── db.js                           (Upstash Redis)
+│   ├── email.js                        (Resend)
 │   └── http.js
 ├── documentacao do projeto/
 │   ├── Documentacao_Projeto_Inventario_WiFi.docx
@@ -157,10 +150,13 @@ npm run lint
 
 ### 3.3 Painel de administração
 
-Acessível apenas para o admin. Funcionalidades:
+Acessível apenas para o admin. Funcionalidades (abas do painel):
 - **Pedidos pendentes:** ver, aprovar ou recusar pedidos de acesso
 - **Usuários aprovados:** listar, gerar nova senha, remover acesso
-- **Contador de visitas:** total de visitas ao site + visitas hoje
+- **Criar usuário:** criar conta manualmente (com senha automática ou definida)
+- **Notificar usuários:** marcar usuários e enviar email de alerta de atualização da página
+- **Sessões:** listar sessões de acesso e exportar em Excel/PDF/CSV
+- **Contador de visitas:** total de visitas ao site + visitas hoje (sempre visível no topo)
 
 O botão "Administração" aparece no cabeçalho ao lado de "Atualizar dados".
 
@@ -269,40 +265,53 @@ vercel env rm NOME_VARIAVEL production --yes
 
 Todas as APIs ficam em `api/` e são executadas como Vercel Serverless Functions (Node.js).
 
-### 7.1 Autenticação
+### 7.1 Autenticação (`api/auth.js`)
 
 | Endpoint | Método | Descrição | Auth |
 |----------|--------|-----------|------|
-| `/api/login` | POST | Login (email + senha → token JWT) | Não |
-| `/api/check-admin` | GET | Verificar se é admin (retorna `isAdmin`) | Bearer token |
-| `/api/seed` | POST | Criar admin inicial (protegido por `ADMIN_SECRET`) | ADMIN_SECRET |
+| `/api/auth?action=login` | POST | Login (email + senha → token JWT 30 dias) | Não |
+| `/api/auth?action=logout` | POST | Encerrar sessão | Token/sessionId |
+| `/api/auth?action=check-admin` | GET | Verificar se é admin (retorna `isAdmin`) | Bearer token |
+| `/api/auth?action=visits` | POST | Registrar visita (incrementa contadores) | Não |
 
-### 7.2 Gerenciamento de acesso
-
-| Endpoint | Método | Descrição | Auth |
-|----------|--------|-----------|------|
-| `/api/request-access` | POST | Solicitar acesso (nome + email) | Não |
-| `/api/pending` | GET | Listar pedidos pendentes | Bearer token (admin) |
-| `/api/approve` | POST | Aprovar pedido (gera senha, envia email) | Bearer token (admin) |
-| `/api/deny` | POST | Recusar pedido | Bearer token (admin) |
-| `/api/list-users` | GET | Listar usuários aprovados | Bearer token (admin) |
-| `/api/send-password` | POST | Gerar nova senha para usuário | Bearer token (admin) |
-| `/api/revoke` | POST | Remover acesso de usuário | Bearer token (admin) ou ADMIN_SECRET |
-
-### 7.3 Estatísticas
+### 7.2 Acesso público (`api/public.js`)
 
 | Endpoint | Método | Descrição | Auth |
 |----------|--------|-----------|------|
-| `/api/visits` | POST | Registrar visita (incrementa contadores) | Não |
-| `/api/visits` | GET | Consultar contagem de visitas | Não |
+| `/api/public?action=request-access` | POST | Solicitar acesso (nome + email) | Não |
 
-### 7.4 Exemplo: remover acesso via curl
+### 7.3 Administração (`api/admin.js`)
+
+| Endpoint | Método | Descrição | Auth |
+|----------|--------|-----------|------|
+| `/api/admin?action=pending` | GET | Listar pedidos pendentes | Bearer token (admin) |
+| `/api/admin?action=users` | GET | Listar usuários aprovados | Bearer token (admin) |
+| `/api/admin?action=visits` | GET | Consultar contagem de visitas | Bearer token (admin) |
+| `/api/admin?action=approve` | POST | Aprovar pedido (gera senha, envia email) | Bearer token (admin) |
+| `/api/admin?action=deny` | POST | Recusar pedido | Bearer token (admin) |
+| `/api/admin?action=create-user` | POST | Criar usuário manualmente | Bearer token (admin) |
+| `/api/admin?action=send-password` | POST | Gerar nova senha para usuário | Bearer token (admin) |
+| `/api/admin?action=revoke` | POST | Remover acesso de usuário | Bearer token (admin) |
+| `/api/admin?action=send-update-alert` | POST | Enviar email de alerta de atualização para usuários selecionados | Bearer token (admin) |
+
+### 7.4 Sessões e exportação (`api/sessions.js`)
+
+| Endpoint | Método | Descrição | Auth |
+|----------|--------|-----------|------|
+| `/api/sessions?action=visits` | GET | Consultar contagem de visitas | Não |
+| `/api/sessions?action=visits` | POST | Registrar visita | Não |
+| `/api/sessions?action=sessions` | GET | Listar sessões de acesso | Bearer token (admin) |
+| `/api/sessions?action=sessions&format=excel` | GET | Exportar sessões em Excel | Bearer token (admin) |
+| `/api/sessions?action=sessions&format=pdf` | GET | Exportar sessões em PDF | Bearer token (admin) |
+| `/api/sessions?action=sessions&format=csv` | GET | Exportar sessões em CSV | Bearer token (admin) |
+
+### 7.5 Exemplo: enviar alerta de atualização via curl
 
 ```bash
-curl -X POST https://inventariodowifi.vercel.app/api/revoke \
+curl -X POST "https://inventariodowifi.vercel.app/api/admin?action=send-update-alert" \
   -H "Content-Type: application/json" \
-  -H "x-admin-secret: SEU_ADMIN_SECRET" \
-  -d '{"email":"pessoa@exemplo.com"}'
+  -H "Authorization: Bearer SEU_TOKEN_ADMIN" \
+  -d '{"emails":["usuario@exemplo.com"],"subject":"Atualização da página","message":"A página foi atualizada."}'
 ```
 
 ---
@@ -318,7 +327,7 @@ curl -X POST https://inventariodowifi.vercel.app/api/revoke \
 
 ### 8.2 Login e Autenticação
 - Tela de login com email + senha
-- Botão "Solicitar acesso" para novos usuários
+- Botão "Solicitar acesso" para novos usuários (envia pedido pendente ao admin)
 - Tokens JWT válidos por 30 dias (armazenados no sessionStorage)
 - Verificação de admin em cada requisição
 
@@ -327,7 +336,11 @@ curl -X POST https://inventariodowifi.vercel.app/api/revoke \
 - Lista de usuários aprovados
 - Geração de nova senha para usuários
 - Remoção de acesso
+- Criação manual de usuários
 - Contador de visitas: total e do dia atual
+- Registro de sessões de acesso (login/logout/duração/IP)
+- Exportação de sessões em Excel, PDF e CSV
+- **Notificação de usuários:** marcar usuários com checkboxes e enviar email de alerta de atualização da página (com assunto e mensagem técnicos padrão, assinado por Luiz Fernando)
 
 ### 8.4 Dashboard Intelbras
 - KPIs: Total, Online, Offline, Sites, Modelo predominante, Disponibilidade
@@ -429,12 +442,14 @@ npm run lint
 
 ---
 
-## 12. Arquivo de Contexto
+## 12. Arquivo de Contexto e Ponto de Início
 
 Existe o arquivo `CONTEXTO.md` na raiz do projeto com um resumo rápido para retomar o trabalho sem precisar ler toda esta documentação. Em uma nova sessão do opencode, basta digitar: **"leia o CONTEXTO.md do projeto"**.
+
+Também existe o arquivo `CONTINUAR_SESSAO.bat` (atalho/ponto de início) que, ao ser aberto, mostra o resumo completo do último acesso: o que foi feito, os arquivos modificados e os comandos úteis, além de abrir o terminal já no diretório do projeto.
 
 ---
 
 *Documentação gerada automaticamente*  
 Criado por **Luiz Fernando Peixoto** | luiz.peixoto@oi.net.br  
-29 de agosto de 2026
+Atualizado em 31 de agosto de 2026

@@ -62,12 +62,33 @@ vercel alias set <URL-NEW-DEPLOY> inventariodowifi.vercel.app
 ## ✅ Já implementado / concluído
 - Sistema de login via email + senha (tokens JWT, 30 dias)
 - Pedido de acesso por nome + email (botão "Solicitar acesso")
-- Painel admin: aprovar/recusar pedidos, listar usuários, nova senha, remover acesso
+- Painel admin: aprovar/recusar pedidos, listar usuários, nova senha, remover acesso, criar usuário
 - Seed do admin por endpoint protegido
-- Contador de visitas exibido no painel admin (total + hoje) — API `api/visits.js`
+- Contador de visitas exibido no painel admin (total + hoje) — API `api/sessions.js`
+- Registro e exportação de sessões (Excel/PDF/CSV) no painel admin
+- **Notificar usuários:** botão no painel admin para marcar usuários e enviar email de alerta de atualização da página (assunto/mensagem técnicos padrão, assinado por Luiz Fernando)
 - Logo Oi substituído por logo WiFi (`public/logo-wifi.svg`)
 - Botão "Administração" movido para o cabeçalho (ao lado de "Atualizar dados")
 - Atalhos de atualização: `atualizar.ps1`, `Atualizar Projeto.bat`, atalho na Área de Trabalho
+
+## 🧭 Endpoints atuais (importante)
+- Login/logout/check-admin/visitas: `/api/auth?action=login|logout|check-admin|visits`
+- Solicitar acesso: `/api/public?action=request-access` (⚠️ já foi `api/request-access` — rota que não existe)
+- Adm: `/api/admin?action=approve|deny|create-user|send-password|revoke|send-update-alert|pending|users|visits`
+- Sessões/visitas/exportação: `/api/sessions?action=visits|sessions` (+ `&format=excel|pdf|csv`)
+
+## 🕘 Última sessão (31/08/2026)
+1. **Correção do cadastro (Solicitar acesso)** — `src/components/AccessRequest.jsx` chamava
+   `api/request-access` (rota inexistente). Corrigido para `api/public?action=request-access`.
+   O deploy em produção ainda estava com o código antigo; feito commit, push e novo deploy +
+   atualização do alias `inventariodowifi.vercel.app`.
+2. **Notificação de usuários por email** — nova aba "Notificar usuários" no painel admin:
+   - Marca usuários aprovados com checkboxes (e "marcar todos")
+   - Assunto/mensagem técnicos padrão editáveis
+   - Novo endpoint `api/admin?action=send-update-alert`
+   - Email padrão: "Atualização da página — Inventário de Redes Wi-Fi", assinado por
+     Luiz Fernando (luiz.peixoto@oi.net.br)
+   - Arquivos: `api/admin.js`, `src/components/AdminPanel.jsx`, `src/App.css`
 
 ## 🧱 Stack
 - React 19 + Vite, Recharts, PapaParse, SheetJS, Lucide
