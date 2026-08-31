@@ -149,6 +149,39 @@ export default async function handler(req, res) {
       return json(res, 200, { ok: true, message: 'Acesso removido.' })
     }
 
+    // POST - send update alert (notificar usuários sobre atualização da página)
+    if (action === 'send-update-alert') {
+      const { emails, subject, message } = body || {}
+      const list = Array.isArray(emails) ? emails.filter(Boolean) : []
+      if (list.length === 0) {
+        return json(res, 400, { ok: false, error: 'Selecione ao menos um usuário para notificar.' })
+      }
+      if (!emailAvailable()) {
+        return json(res, 200, { ok: true, needsEmail: true, emails: list, message: 'Envio de email não configurado no servidor.' })
+      }
+      const fullSubject = subject && subject.trim() ? subject.trim() : 'Atualização da página — Inventário de Redes Wi-Fi'
+      const fullMessage = message && message.trim()
+        ? message.trim()
+        : `Olá,\n\nInformamos que a página do Inventário de Redes Wi-Fi foi atualizada.\n\nRecomendamos que recarregue a página para visualizar as mudanças mais recentes.\n\nAtenciosamente,\nLuiz Fernando\nluiz.peixoto@oi.net.br`
+      const htmlBody = (fullMessage.split('\n').map(line => `<p>${line}</p>`).join(''))
+      const html = `<div style="font-family:Arial,sans-serif;color:#1f2937;line-height:1.5">${htmlBody}</div>`
+      const results = []
+      for (const email of list) {
+        const to = String(email).toLowerCase()
+        try {
+          await sendMail({ to, subject: fullSubject, text: fullMessage, html })
+          results.push({ email: to, sent: true })
+        } catch (err) {
+          results.push({ email: to, sent: false, error: err.message })
+        }
+      }
+      const errors = results.filter(r => !r.sent)
+      if (errors.length === results.length) {
+        return json(res, 200, { ok: true, needsEmail: true, results, message: 'Falha ao enviar os emails: ' + errors[0].error })
+      }
+      return json(res, 200, { ok: true, results, message: `${results.length - errors.length} email(s) de atualização enviado(s).` })
+    }
+
     return json(res, 400, { ok: false, error: 'Ação inválida.' })
   }
 

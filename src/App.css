@@ -1696,6 +1696,54 @@ body {
 .admin-card.pending { border-left: 3px solid var(--amber); }
 .admin-card.user { border-left: 3px solid var(--green); }
 
+.admin-card.selectable {
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.admin-card.selectable:hover { border-color: var(--accent-2); }
+.admin-card.selectable.checked {
+  border-left: 3px solid var(--accent-2);
+  background: color-mix(in srgb, var(--accent-2) 8%, var(--card));
+}
+
+.admin-card-check {
+  display: flex;
+  align-items: center;
+  margin-right: 12px;
+}
+.admin-card-check input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--accent-2);
+  cursor: pointer;
+}
+
+.admin-notify {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.admin-notify-compose {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-input.admin-textarea {
+  resize: vertical;
+  min-height: 160px;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.admin-notify-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .admin-card-head {
   display: flex;
   align-items: flex-start;

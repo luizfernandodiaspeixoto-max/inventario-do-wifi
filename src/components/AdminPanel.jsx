@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   ShieldCheck, Clock, Users, CheckCircle, XCircle,
-  Mail, KeyRound, Trash2, Eye, EyeOff, Loader, BarChart3, MousePointerClick, UserPlus, Activity, FileSpreadsheet, FileText, Download,
+  Mail, KeyRound, Trash2, Eye, EyeOff, Loader, BarChart3, MousePointerClick, UserPlus, Activity, FileSpreadsheet, FileText, Download, Megaphone, CheckSquare,
 } from 'lucide-react'
 import { api } from '../utils/api'
 import { formatNumber } from '../utils/dataLoader'
@@ -470,6 +470,167 @@ function CreateUser({ onRefresh }) {
   )
 }
 
+const DEFAULT_ALERT_SUBJECT = 'Atualização da página — Inventário de Redes Wi-Fi'
+const DEFAULT_ALERT_MESSAGE = `Olá,
+
+Informamos que a página do Inventário de Redes Wi-Fi foi atualizada.
+
+Recomendamos que recarregue a página para visualizar as mudanças mais recentes.
+
+Atenciosamente,
+Luiz Fernando
+luiz.peixoto@oi.net.br`
+
+function NotifyUsers({ onRefresh }) {
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [selected, setSelected] = useState({})
+  const [subject, setSubject] = useState(DEFAULT_ALERT_SUBJECT)
+  const [message, setMessage] = useState(DEFAULT_ALERT_MESSAGE)
+  const [sending, setSending] = useState(false)
+  const [msg, setMsg] = useState(null)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const data = await api('admin', { params: { action: 'users' } })
+      setUsers(data.items || [])
+    } catch (err) {
+      setMsg({ type: 'error', text: err.message })
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  function toggle(email) {
+    setSelected((prev) => ({ ...prev, [email]: !prev[email] }))
+  }
+
+  function toggleAll() {
+    const allChecked = users.length > 0 && users.every((u) => selected[u.email])
+    const next = {}
+    if (!allChecked) users.forEach((u) => { next[u.email] = true })
+    setSelected(next)
+  }
+
+  function resetDefaults() {
+    setSubject(DEFAULT_ALERT_SUBJECT)
+    setMessage(DEFAULT_ALERT_MESSAGE)
+  }
+
+  async function handleSend(e) {
+    e.preventDefault()
+    setMsg(null)
+    const emails = Object.keys(selected).filter((em) => selected[em])
+    if (emails.length === 0) {
+      setMsg({ type: 'error', text: 'Selecione ao menos um usuário para notificar.' })
+      return
+    }
+    setSending(true)
+    try {
+      const res = await api('admin', {
+        method: 'POST',
+        params: { action: 'send-update-alert' },
+        body: { emails, subject, message },
+      })
+      if (res.needsEmail) {
+        setMsg({ type: 'error', text: res.message })
+      } else {
+        setMsg({ type: 'ok', text: res.message })
+        setSelected({})
+        onRefresh()
+      }
+    } catch (err) {
+      setMsg({ type: 'error', text: err.message })
+    } finally {
+      setSending(false)
+    }
+  }
+
+  if (loading) return <div className="admin-empty"><Loader size={18} className="spin" /> Carregando usuários...</div>
+
+  const checkedCount = Object.keys(selected).filter((em) => selected[em]).length
+  const allChecked = users.length > 0 && users.every((u) => selected[u.email])
+
+  return (
+    <div className="admin-notify">
+      {msg && msg.type === 'ok' && <div className="admin-msg ok">{msg.text}</div>}
+      {msg && msg.type === 'error' && <div className="admin-msg error">{msg.text}</div>}
+
+      {users.length === 0 ? (
+        <div className="admin-empty"><Users size={18} /> Nenhum usuário aprovado para notificar.</div>
+      ) : (
+        <form onSubmit={handleSend}>
+          <div className="admin-notify-users">
+            <div className="admin-list">
+              <button type="button" className="admin-card user selectable" onClick={toggleAll}>
+                <div className="admin-card-head">
+                  <div className="admin-card-info">
+                    <span className="admin-card-name"><CheckSquare size={15} /> {allChecked ? 'Desmarcar todos' : 'Marcar todos'}</span>
+                    <span className="admin-card-email">{users.length} usuário(s)</span>
+                  </div>
+                </div>
+              </button>
+              {users.map((u) => (
+                <div className={`admin-card user selectable ${selected[u.email] ? 'checked' : ''}`} key={u.email} onClick={() => toggle(u.email)}>
+                  <div className="admin-card-head">
+                    <div className="admin-card-check">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(selected[u.email])}
+                        onChange={() => {}}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div className="admin-card-info">
+                      <span className="admin-card-name">{u.name}</span>
+                      <span className="admin-card-email">{u.email}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="admin-notify-compose">
+            <div className="admin-field">
+              <label>Assunto</label>
+              <input
+                type="text"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="admin-input"
+                disabled={sending}
+              />
+            </div>
+            <div className="admin-field">
+              <label>Mensagem (email padrão técnico)</label>
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="admin-input admin-textarea"
+                rows={9}
+                disabled={sending}
+              />
+            </div>
+            <div className="admin-notify-actions">
+              <button type="button" className="admin-action blue" onClick={resetDefaults}>
+                <FileText size={14} /> Restaurar padrão
+              </button>
+              <button type="submit" className="login-btn" disabled={sending || checkedCount === 0}>
+                {sending ? <Loader size={15} className="spin" /> : <Megaphone size={15} />}
+                {sending ? 'Enviando...' : `Enviar alerta (${checkedCount} destinatário${checkedCount === 1 ? '' : 's'})`}
+              </button>
+            </div>
+          </div>
+        </form>
+      )}
+    </div>
+  )
+}
+
 export default function AdminPanel({ refreshKey, onRefresh }) {
   const [tab, setTab] = useState('pending')
 
@@ -487,6 +648,9 @@ export default function AdminPanel({ refreshKey, onRefresh }) {
           <button className={`admin-tab ${tab === 'create' ? 'active' : ''}`} onClick={() => setTab('create')}>
             <UserPlus size={15} /> Criar usuário
           </button>
+          <button className={`admin-tab ${tab === 'notify' ? 'active' : ''}`} onClick={() => setTab('notify')}>
+            <Megaphone size={15} /> Notificar usuários
+          </button>
           <button className={`admin-tab ${tab === 'sessions' ? 'active' : ''}`} onClick={() => setTab('sessions')}>
             <Activity size={15} /> Sessões
           </button>
@@ -497,6 +661,7 @@ export default function AdminPanel({ refreshKey, onRefresh }) {
         {tab === 'pending' && <PendingList onRefresh={onRefresh} key={'pending-' + refreshKey} />}
         {tab === 'users' && <UsersList onRefresh={onRefresh} key={'users-' + refreshKey} />}
         {tab === 'create' && <CreateUser onRefresh={onRefresh} />}
+        {tab === 'notify' && <NotifyUsers onRefresh={onRefresh} key={'notify-' + refreshKey} />}
         {tab === 'sessions' && <SessionsList onRefresh={onRefresh} key={'sessions-' + refreshKey} />}
       </div>
     </div>
