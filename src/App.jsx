@@ -18,6 +18,7 @@ const TABS = [
   { id: 'aruba', label: 'Aruba' },
   { id: 'ruckus', label: 'Ruckus' },
   { id: 'meraki', label: 'Meraki' },
+  { id: 'admin', label: 'Administração', adminOnly: true },
 ]
 
 function Overview({ intelbras, aruba, ruckus, meraki, handleSelect }) {
@@ -125,10 +126,10 @@ function App() {
         if (!active) return
         setBase({ status: 'error', intelbras: [], aruba: [], ruckus: [], meraki: [], error: String(err), availability: {} })
       })
-    api('api/check-admin')
+    api('auth', { params: { action: 'check-admin' } })
       .then((d) => { if (active) setIsAdmin(Boolean(d.isAdmin)) })
       .catch(() => { if (active) setIsAdmin(false) })
-    api('api/visits', { method: 'POST' }).catch(() => {})
+    api('auth', { method: 'POST', params: { action: 'visits' } }).catch(() => {})
     return () => { active = false }
   }, [])
 
@@ -177,16 +178,6 @@ function App() {
             <span>Última atualização</span>
             <code>{lastUpdateGlobal.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}</code>
           </div>
-          {isAdmin && (
-            <button
-              className={`upload-btn header admin ${tab === 'admin' ? 'active' : ''}`}
-              onClick={() => setTab(tab === 'admin' ? 'overview' : 'admin')}
-              title="Administração"
-            >
-              <ShieldCheck size={15} />
-              Administração
-            </button>
-          )}
           <button className="upload-btn header" onClick={() => setShowUpload(true)}>
             <UploadCloud size={15} />
             Atualizar dados
@@ -215,16 +206,19 @@ function App() {
         )}
 
         <nav className="tabs">
-          {tabs.map((t) => (
-            <button
-              key={t.id}
-              className={`tab ${tab === t.id ? 'active' : ''}`}
-              onClick={() => setTab(t.id)}
-            >
-              <Layers size={15} />
-              {t.label}
-            </button>
-          ))}
+          {tabs.map((t) => {
+            if (t.adminOnly && !isAdmin) return null
+            return (
+              <button
+                key={t.id}
+                className={`tab ${tab === t.id ? 'active' : ''}`}
+                onClick={() => setTab(t.id)}
+              >
+                <Layers size={15} />
+                {t.label}
+              </button>
+            )
+          })}
         </nav>
 
         {state.status === 'loading' && (

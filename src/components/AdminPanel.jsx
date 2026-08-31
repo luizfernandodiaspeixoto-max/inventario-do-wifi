@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   ShieldCheck, Clock, Users, CheckCircle, XCircle,
-  Mail, KeyRound, Trash2, Eye, EyeOff, Loader, BarChart3, MousePointerClick, UserPlus, Activity, FileSpreadsheet, FileText,
+  Mail, KeyRound, Trash2, Eye, EyeOff, Loader, BarChart3, MousePointerClick, UserPlus, Activity, FileSpreadsheet, FileText, Download,
 } from 'lucide-react'
 import { api } from '../utils/api'
 import { formatNumber } from '../utils/dataLoader'
@@ -285,18 +285,38 @@ function SessionsList({ onRefresh: _onRefresh }) {
   async function exportReport(format) {
     setMsg(null)
     try {
-      const res = await fetch(`/api-combined/sessions?action=sessions&format=${format}`)
+      const res = await fetch(`/api/sessions?action=sessions&format=${format}`)
       if (!res.ok) throw new Error('Erro ao exportar')
       const blob = await res.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `sessoes-${new Date().toISOString().slice(0,10)}.${format === 'excel' ? 'xlsx' : 'pdf'}`
+      a.download = `sessoes-${new Date().toISOString().slice(0,10)}.${format === 'excel' ? 'xlsx' : format === 'pdf' ? 'pdf' : 'csv'}`
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
       setMsg({ type: 'ok', text: `Relatório ${format.toUpperCase()} baixado.` })
+    } catch (err) {
+      setMsg({ type: 'error', text: err.message })
+    }
+  }
+
+  async function exportCSV() {
+    setMsg(null)
+    try {
+      const res = await fetch(`/api/sessions?action=sessions&format=csv`)
+      if (!res.ok) throw new Error('Erro ao exportar CSV')
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `sessoes-${new Date().toISOString().slice(0,10)}.csv`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      setMsg({ type: 'ok', text: 'Relatório CSV baixado.' })
     } catch (err) {
       setMsg({ type: 'error', text: err.message })
     }
@@ -312,6 +332,7 @@ function SessionsList({ onRefresh: _onRefresh }) {
       <div className="admin-sessions-toolbar">
         <button className="admin-action green" onClick={() => exportReport('excel')}><FileSpreadsheet size={14} /> Excel</button>
         <button className="admin-action blue" onClick={() => exportReport('pdf')}><FileText size={14} /> PDF</button>
+        <button className="admin-action amber" onClick={exportCSV}><Download size={14} /> CSV</button>
       </div>
       <div className="admin-sessions-table-wrapper">
         <table className="admin-sessions-table">

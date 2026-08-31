@@ -12,7 +12,7 @@ export default function AccessRequest({ onClose }) {
     setLoading(true)
     setStatus(null)
     try {
-      const res = await fetch('api/request-access', {
+      const res = await fetch('api/public?action=request-access', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email }),

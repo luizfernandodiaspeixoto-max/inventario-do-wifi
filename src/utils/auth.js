@@ -11,7 +11,7 @@ export function isAuthenticated() {
 }
 
 export async function login(email, password) {
-  const res = await fetch('api/login', {
+  const res = await fetch('api/auth?action=login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
@@ -53,7 +53,7 @@ export async function logout() {
   const sessionId = getSessionId()
   if (sessionId) {
     try {
-      await fetch('api/logout', {
+      await fetch('api/auth?action=logout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId }),

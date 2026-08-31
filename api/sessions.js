@@ -64,6 +64,16 @@ export default async function handler(req, res) {
       return json(res, 200, { ok: true, items: formatted })
     }
 
+    if (format === 'csv') {
+      const csvHeader = 'Nome,Email,IP,Login,Logout,Tempo logado,Status\n'
+      const csvRows = formatted.map(f => 
+        `"${f.name}","${f.email}","${f.ip}","${f.loginAt}","${f.logoutAt}","${f.duration}","${f.active ? 'Ativo' : 'Finalizado'}"`
+      ).join('\n')
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8')
+      res.setHeader('Content-Disposition', `attachment; filename="sessoes-${new Date().toISOString().slice(0,10)}.csv"`)
+      return res.end('\uFEFF' + csvHeader + csvRows) // BOM para UTF-8 no Excel
+    }
+
     if (format === 'excel') {
       const XLSX = await import('xlsx')
       const wb = XLSX.utils.book_new()

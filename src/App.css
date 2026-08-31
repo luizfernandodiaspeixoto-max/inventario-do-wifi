@@ -37,20 +37,22 @@ body {
 /* ---------- Header ---------- */
 .topbar {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 10px 24px;
+  gap: 10px;
+  padding: 14px 16px;
   background: linear-gradient(135deg, #0b1220 0%, #101a30 60%, #14213d 100%);
   border-bottom: 1px solid var(--border);
   z-index: 50;
   flex-shrink: 0;
+  text-align: center;
 }
 
 .brand {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
@@ -62,7 +64,7 @@ body {
 }
 
 .brand-img {
-  height: 40px;
+  height: 44px;
   width: auto;
   object-fit: contain;
   display: block;
@@ -70,21 +72,25 @@ body {
 
 .brand h1 {
   margin: 0;
-  font-size: 17px;
+  font-size: 18px;
   color: var(--text-h);
   letter-spacing: -0.3px;
+  text-align: center;
 }
 
 .brand p {
-  margin: 2px 0 0;
-  font-size: 12px;
+  margin: 0;
+  font-size: 13px;
   color: var(--text-muted);
+  text-align: center;
 }
 
 .header-actions {
   display: flex;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
   align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
@@ -812,20 +818,7 @@ body {
   transform: translateY(-1px);
 }
 
-.upload-btn.header.admin {
-  background: rgba(52, 211, 153, 0.12);
-  border-color: rgba(52, 211, 153, 0.4);
-  color: #6ee7b7;
-}
 
-.upload-btn.header.admin:hover {
-  background: rgba(52, 211, 153, 0.22);
-}
-
-.upload-btn.header.admin.active {
-  background: rgba(52, 211, 153, 0.3);
-  border-color: rgba(52, 211, 153, 0.7);
-}
 
 .custom-badge {
   display: inline-flex;
