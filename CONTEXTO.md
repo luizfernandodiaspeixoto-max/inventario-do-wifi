@@ -19,12 +19,21 @@
   (não colocar segredos neste arquivo — o GitHub bloqueia push com tokens)
 - Já testado (ping: PONG). Admin criado. Usuário de teste foi removido.
 
-## ✉️ Resend (email automático)
-- `RESEND_API_KEY` → valor no `G:\meu-projeto\.env.local` e no Vercel
-- `MAIL_FROM="Inventário Wi-Fi <onboarding@resend.dev>"`
-- ⚠️ Modo TESTE: só entrega email para `luizfernandodiaspeixoto@gmail.com`
-- Usuário decidiu NÃO verificar domínio. Para emails de outros endereços a senha é
-  mostrada no painel admin (comportamento esperado, não é bug).
+## ✉️ Envio de email — EMAILJS (atual)
+- **EmailJS** (gratuito, 200 emails/mês): `EMAILJS_SERVICE_ID`, `EMAILJS_PUBLIC_KEY`,
+  `EMAILJS_PRIVATE_KEY` no `.env.local` e no Vercel.
+  - Dois templates: `EMAILJS_TEMPLATE_UPDATE` (atualização da página, `template_9r13m4s`)
+    e `EMAILJS_TEMPLATE_NEWUSER` (novo usuário/senha, `template_usfk3qg`).
+  - `lib/email.js` (`sendMail({ to, subject, text, template })`) escolhe o template por `template`:
+    `'update'` → atualização da página; sem template/`'newuser'` → novo usuário.
+  - Endpoint `send-update-alert` (admin.js) usa `template: 'update'`.
+- Histórico: Resend (modo teste, não entregava) → Brevo (precisava SMS para criar chave, não recebia)
+  → Mailjet (conta bloqueada) → EmailJS (funcionando).
+
+## ✉️ Envio de email — BREVO/Resend (histórico, NÃO usar)
+- **Brevo** (300 emails/dia): **não funcionou** — pede confirmação por SMS para criar a API key,
+  e o usuário não recebe o SMS no Brasil.
+- **Resend**: modo teste — só entrega para email verificado na conta. Não usar como principal.
 
 ## 🔐 Outras env vars (em G:\meu-projeto\.env.local e no Vercel)
 - `ADMIN_EMAIL=luiz.peixoto@oi.net.br`
@@ -105,7 +114,24 @@ vercel alias set <URL-NEW-DEPLOY> inventariodowifi.vercel.app
 
 ## 🧱 Stack
 - React 19 + Vite, Recharts, PapaParse, SheetJS, Lucide
-- Vercel Serverless Functions (pasta `api/`), Upstash Redis, Resend, jose (JWT)
+- Vercel Serverless Functions (pasta `api/`), Upstash Redis, Brevo (envio de email), Resend (fallback), jose (JWT)
+
+## 🕘 Sessão atual (02/09/2026) — Concluída
+**Migração definitiva para EmailJS — envio de email real funcionando**
+- **Problema:** emails não chegavam. Resend em modo teste, Brevo pede SMS para criar chave
+  (não recebido no Brasil), Mailjet bloqueou a conta (401 mj-0001).
+- **Solução:** EmailJS (gratuito, 200 emails/mês) com **dois templates**:
+  - `template_9r13m4s` → atualização da página (botão "Notificar usuários" / `send-update-alert`)
+  - `template_usfk3qg` → novo usuário (criação conta, aprovação, nova senha)
+- **Arquivos modificados:**
+  - `lib/email.js` — reescrito: `sendMail({to, subject, text, template})` usa
+    `EMAILJS_TEMPLATE_UPDATE` ou `EMAILJS_TEMPLATE_NEWUSER`.
+  - `api/admin.js` — `send-update-alert` chama `sendMail` com `template: 'update'`.
+  - `.env.local` — removidas MAILJET/RESEND/BREVO; adicionadas EMAILJS_* (service, public, private, 2 templates).
+- **Vercel:** removida `EMAILJS_TEMPLATE_ID`; adicionadas `EMAILJS_TEMPLATE_UPDATE` e
+  `EMAILJS_TEMPLATE_NEWUSER`.
+- **Testado:** envio de atualização da página e de novo usuário chegaram com conteúdo correto.
+  Deploy `inventariodowifi-ge603k37n`, alias `inventariodowifi.vercel.app` atualizado.
 
 ## 📝 Observações para próximas sessões
 - $username é Luiz Fernando. Responde em português.
