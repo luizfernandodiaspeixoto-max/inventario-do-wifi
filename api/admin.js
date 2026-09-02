@@ -169,7 +169,7 @@ export default async function handler(req, res) {
       for (const email of list) {
         const to = String(email).toLowerCase()
         try {
-          await sendMail({ to, subject: fullSubject, text: fullMessage, html })
+          await sendMail({ to, subject: fullSubject, text: fullMessage, html, template: 'update' })
           results.push({ email: to, sent: true })
         } catch (err) {
           results.push({ email: to, sent: false, error: err.message })
