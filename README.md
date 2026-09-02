@@ -22,7 +22,7 @@ Ou dê duplo clique no atalho **"Inventario Wi-Fi"** na Área de Trabalho.
 O site é protegido por login. O fluxo é:
 
 1. O visitante clica em **"Solicitar acesso"** e informa nome + email
-2. O pedido aparece no painel de administração
+2. O pedido aparece no painel de administração **e o admin recebe um email de aviso** (nome/email do solicitante + link para o painel)
 3. O admin aprova — o sistema gera uma senha e envia por email (ou mostra no painel)
 4. O visitante loga com email + senha
 

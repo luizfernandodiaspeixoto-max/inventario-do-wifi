@@ -62,6 +62,8 @@ vercel alias set <URL-NEW-DEPLOY> inventariodowifi.vercel.app
 ## ✅ Já implementado / concluído
 - Sistema de login via email + senha (tokens JWT, 30 dias)
 - Pedido de acesso por nome + email (botão "Solicitar acesso")
+- **Email ao admin quando alguém solicita acesso** — ao salvar o pedido, enviado email para
+  `luiz.peixoto@oi.net.br` com nome/email do solicitante e link para o painel (`api/public.js`)
 - Painel admin: aprovar/recusar pedidos, listar usuários, nova senha, remover acesso, criar usuário
 - Seed do admin por endpoint protegido
 - Contador de visitas exibido no painel admin (total + hoje) — API `api/sessions.js`
@@ -77,7 +79,18 @@ vercel alias set <URL-NEW-DEPLOY> inventariodowifi.vercel.app
 - Adm: `/api/admin?action=approve|deny|create-user|send-password|revoke|send-update-alert|pending|users|visits`
 - Sessões/visitas/exportação: `/api/sessions?action=visits|sessions` (+ `&format=excel|pdf|csv`)
 
-## 🕘 Última sessão (31/08/2026)
+## 🕘 Última sessão (01/09/2026)
+**Email de notificação de nova solicitação de acesso**
+- **Antes:** `api/public?action=request-access` só salvava o pedido no banco. O admin não recebia
+  nenhum email ao solicitarem acesso — precisava entrar no painel para ver os pedidos.
+- **Agora:** `api/public.js` envia email para `ADMIN_EMAIL` com nome/email do solicitante e link
+  para o painel, logo após salvar o pedido. Commit `c85e201`, deploy `inventariodowifi-fr7petzrw`,
+  alias `inventariodowifi.vercel.app` atualizado.
+- ⚠️ Resend ainda em modo TESTE — emails só chegam para endereço verificado na conta Resend
+  (provavelmente luizfernandodiaspeixoto@gmail.com). Para receber no oi.net.br, verificar email/
+  domínio em https://resend.com/domains.
+
+## 🕘 Sessão anterior (31/08/2026)
 1. **Correção do cadastro (Solicitar acesso)** — `src/components/AccessRequest.jsx` chamava
    `api/request-access` (rota inexistente). Corrigido para `api/public?action=request-access`.
    O deploy em produção ainda estava com o código antigo; feito commit, push e novo deploy +

@@ -1,10 +1,20 @@
 # Resumo da Sessão - Inventário de Redes Wi-Fi
 
-## 📅 Data: 31/08/2026 (atualização da sessão anterior 29/08/2026)
+## 📅 Data: 01/09/2026 (continuação das sessões 31/08/2026 e 29/08/2026)
 
 ---
 
-## ✅ O que foi feito nesta sessão
+## ✅ O que foi feito nesta sessão (01/09/2026)
+
+### 1. Email de notificação de nova solicitação de acesso (correção de funcionalidade ausente)
+- **Problema:** quando alguém solicitava acesso via "Solicitar acesso" (`api/public?action=request-access`), o sistema apenas salvava o pedido no banco (Upstash Redis) e **nenhum email era enviado ao admin**. O admin só ficava sabendo do pedido entrando no painel admin.
+- **Fix:** `api/public.js:42-53` → ao salvar o pedido pendente, envia email para `ADMIN_EMAIL` (`luiz.peixoto@oi.net.br`) com nome e email do solicitante e link para o painel admin.
+- **Arquivo alterado:** `api/public.js` (adicionados imports de `sendMail`/`emailAvailable`, constantes `SITE_URL` e `ADMIN_EMAIL`, e chamada `sendMail` após `savePending`)
+- **Deploy:** commit `c85e201` → push → deploy (`inventariodowifi-fr7petzrw.vercel.app`) → alias `inventariodowifi.vercel.app` atualizado
+
+---
+
+## ✅ O que foi feito na sessão anterior (31/08/2026)
 
 ### 1. Correção do Cadastro ("Solicitar acesso")
 - **Problema**: O frontend (`src/components/AccessRequest.jsx`) chamava `api/request-access`,
@@ -59,26 +69,38 @@ vercel alias set <nova-url> inventariodowifi.vercel.app
 ---
 
 ## 📁 Arquivos-chave modificados
-- `src/components/AccessRequest.jsx` — correção da URL do cadastro
-- `api/admin.js` — novo endpoint `send-update-alert`
-- `src/components/AdminPanel.jsx` — aba "Notificar usuários"
-- `src/App.css` — estilos da nova seção de notificação
+- `api/public.js` — **novo neste sessão:** envia email ao admin quando alguém solicita acesso
+- `src/components/AccessRequest.jsx` — correção da URL do cadastro (sessão anterior)
+- `api/admin.js` — endpoint `send-update-alert` (sessão anterior)
+- `src/components/AdminPanel.jsx` — aba "Notificar usuários" (sessão anterior)
+- `src/App.css` — estilos da nova seção de notificação (sessão anterior)
 - `documentacao do projeto/Documentacao_Projeto_Inventario_WiFi.md` — documentação atualizada
 - `CONTEXTO.md` — contexto atualizado
-- `CONTINUAR_SESSAO.bat` — ponto de início criado/atualizado
+- `RESUMO_SESSAO.md` — este arquivo
+- `CONTINUAR_SESSAO.bat` — ponto de início atualizado
 
 ---
 
-## 🧪 Testes feitos
-- Build de produção (`npm run build`): ✅ OK
+## 🧪 Testes feitos (sessão atual + anteriores)
 - Lint (`npm run lint`): ✅ OK (apenas warnings pré-existentes)
+- Deploy em produção (`inventariodowifi-fr7petzrw.vercel.app`): ✅ OK
+- Alias `inventariodowifi.vercel.app` atualizado para o novo deploy: ✅ OK
 - Endpoint `request-access` em produção: ✅ 200 OK
   `{"ok":true,"message":"Solicitação enviada. Aguarde a aprovação do administrador."}`
+  (o teste criou um pedido pendente "Teste" / teste@exemplo.com, recusável no painel)
+- Session 31/08 (anterior): build produção ✅ OK, lint ✅ OK, `request-access` ✅ 200 OK
 - Verificação do deploy em https://inventariodowifi.vercel.app: ✅ novo bundle ativo
 
 ---
 
 ## 📌 Histórico de sessões anteriores
+
+### Sessão 31/08/2026
+1. **Correção do Cadastro ("Solicitar acesso")** — `src/components/AccessRequest.jsx` chamava
+   `api/request-access` (rota inexistente). Corrigido para `api/public?action=request-access`.
+2. **Notificação de usuários por email (novo)** — aba "Notificar usuários" no painel admin
+3. **Documentação atualizada** — Documentacao_Projeto_Inventario_WiFi.md, CONTEXTO.md,
+   RESUMO_SESSAO.md; criado CONTINUAR_SESSAO.bat
 
 ### Sessão 29/08/2026
 1. **Correção do Login Admin** — `src/utils/auth.js` chamava `/api/login` em vez de

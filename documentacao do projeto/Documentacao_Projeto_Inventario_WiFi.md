@@ -135,9 +135,10 @@ npm run lint
 1. O visitante clica em **"Solicitar acesso"** na tela de login
 2. Informa nome e email
 3. O pedido fica **pendente** no painel de administração
-4. O admin aprova ou recusa
-5. Ao aprovar: gera uma senha e envia por email (se configurado) **ou** exibe a senha no painel para copiar
-6. O visitante loga com email + senha recebida
+4. Um **email automático é enviado ao admin** avisando da nova solicitação (nome e email do solicitante + link para o painel)
+5. O admin aprova ou recusa (no painel ou ao abrir o email)
+6. Ao aprovar: gera uma senha e envia por email (se configurado) **ou** exibe a senha no painel para copiar
+7. O visitante loga com email + senha recebida
 
 ### 3.2 Credenciais do administrador
 
@@ -278,7 +279,11 @@ Todas as APIs ficam em `api/` e são executadas como Vercel Serverless Functions
 
 | Endpoint | Método | Descrição | Auth |
 |----------|--------|-----------|------|
-| `/api/public?action=request-access` | POST | Solicitar acesso (nome + email) | Não |
+| `/api/public?action=request-access` | POST | Solicitar acesso (nome + email). Salva pedido pendente e **envia email ao admin** avisando da nova solicitação | Não |
+
+> **Nota:** para o email de notificação ao admin funcionar, o endereço de destino (`ADMIN_EMAIL`)
+> deve estar verificado na conta Resend (em modo teste, só chega para o email verificado).
+> Ver https://resend.com/domains.
 
 ### 7.3 Administração (`api/admin.js`)
 
@@ -305,7 +310,17 @@ Todas as APIs ficam em `api/` e são executadas como Vercel Serverless Functions
 | `/api/sessions?action=sessions&format=pdf` | GET | Exportar sessões em PDF | Bearer token (admin) |
 | `/api/sessions?action=sessions&format=csv` | GET | Exportar sessões em CSV | Bearer token (admin) |
 
-### 7.5 Exemplo: enviar alerta de atualização via curl
+### 7.5 Exemplos via curl
+
+**Solicitar acesso** (avisa o admin por email):
+
+```bash
+curl -X POST "https://inventariodowifi.vercel.app/api/public?action=request-access" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"João","email":"joao@exemplo.com"}'
+```
+
+**Enviar alerta de atualização para usuários selecionados:**
 
 ```bash
 curl -X POST "https://inventariodowifi.vercel.app/api/admin?action=send-update-alert" \
@@ -327,7 +342,7 @@ curl -X POST "https://inventariodowifi.vercel.app/api/admin?action=send-update-a
 
 ### 8.2 Login e Autenticação
 - Tela de login com email + senha
-- Botão "Solicitar acesso" para novos usuários (envia pedido pendente ao admin)
+- Botão "Solicitar acesso" para novos usuários (envia pedido pendente ao admin **e email de aviso ao admin**)
 - Tokens JWT válidos por 30 dias (armazenados no sessionStorage)
 - Verificação de admin em cada requisição
 
@@ -452,4 +467,4 @@ Também existe o arquivo `CONTINUAR_SESSAO.bat` (atalho/ponto de início) que, a
 
 *Documentação gerada automaticamente*  
 Criado por **Luiz Fernando Peixoto** | luiz.peixoto@oi.net.br  
-Atualizado em 31 de agosto de 2026
+Atualizado em 1 de setembro de 2026
